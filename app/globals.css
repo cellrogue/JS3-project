@@ -1,0 +1,148 @@
+/*=============================================
+=                FÖR ATT ANVÄNDA            =
+
+Använda en färgvariabel med tailwind: text-error
+
+Skapa vanlig knapp: <button>
+Skapa sekundär knapp: <button className="secondary">
+
+Skapa error-knapp: <button className="error">
+Skapa disabled-knapp: <button disabled="...">
+
+=============================================*/
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: #001f3f;
+
+        --primary: #e8e8e8;
+        --primary-muted: #cfcfcf;
+
+        --secondary: #32456f;
+        --secondary-muted: #32456fbe;
+
+        --tertiary: #cbb2da;
+
+        --error: #ce0606;
+
+        --admin: #32456f;
+
+        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    }
+}
+
+body {
+    background: var(--background);
+    color: var(--primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1;
+}
+
+/*=====  Styling text  ======*/
+
+a {
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+a:hover {
+    opacity: 0.6;
+}
+
+p {
+    font-size: 0.875rem;
+    font-weight: 400;
+    margin: 1rem 0;
+    line-height: 1.5;
+}
+
+h1 {
+    font-weight: 700;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+}
+
+h2 {
+    font-size: 1.375rem;
+    font-weight: 550;
+}
+
+h3 {
+    font-size: 1.1rem;
+    font-weight: 300;
+}
+
+/*=====  Styling buttons  ======*/
+
+button {
+    display: flex; 
+    justify-content: center;
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem; 
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    width: 100%;
+    font-size: 0.85rem;
+    border-radius: 0.375rem;
+    line-height: 1.25rem;
+    letter-spacing: 0.2px;
+    font-weight: 600;
+    background: var(--secondary);
+    box-shadow: 0 1px 2px 0 rgba(7, 7, 7, 0.25);
+    border: 1px solid #a9a9a939;
+    cursor: pointer;
+    transition: all 0.1s ease-in;
+}
+
+button:hover {
+    transform: translateY(2px);
+}
+
+button.secondary {
+    background: transparent;
+    border: 1px solid #d1d5db;
+}
+
+button.readmore {
+    background: var(--tertiary);
+    font-weight: 550;
+    color: white;
+    border: 1px solid var(--primary);
+}
+
+button.readmore:hover {
+    transform: translateX(4px);
+}
+
+button.error {
+    background-color: var(--error);
+}
+
+button.error:hover {
+    background-color: var(--error);
+}
+
+button.admin {
+    background-color: var(--admin);
+}
+
+button.admin:hover {
+    background-color: var(--admin);
+}
+
+button:disabled {
+    opacity: 0.4;
+}
+
+button:disabled:hover {
+    transform: none;
+}
