@@ -1,13 +1,12 @@
 'use client';
 
-import { auth, db } from '@/firebase.config';
+import { auth } from '/firebase.config';
 import {
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signInWithEmailAndPassword,
     updateProfile,
 } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -20,7 +19,6 @@ const AuthContextProvider = ({ children }) => {
 const [user, setUser] = useState(null)
 const [authLoaded, setAuthLoaded] = useState(false)
 
- // Check if there is a logged in user
 useEffect(() => {
   const unsub = onAuthStateChanged(auth, _user => {
     setUser(_user)

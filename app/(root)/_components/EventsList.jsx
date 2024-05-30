@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import { GoArrowRight } from 'react-icons/go';
 import { useEvents } from './events-provider';
 
 export const EventsList = () => {

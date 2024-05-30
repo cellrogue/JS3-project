@@ -1,6 +1,6 @@
 'use client';
 
-import { auth } from '@/firebase.config';
+import { auth } from '/firebase.config';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 
@@ -17,7 +17,7 @@ function SignOutButton({ onSignOut }) {
 
     return (
         <div onClick={handleSignOut}>
-            <button>Sign Out</button>
+            <button className='rounded p-5 text-sm font-bold m-5'>Sign Out</button>
         </div>
     );
 }

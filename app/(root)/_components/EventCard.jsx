@@ -11,7 +11,6 @@ export const EventCard = ({
     date,
     eventId,
     numberOfSpots,
-    userId,
     bookedUsers,
 }) => {
     const router = useRouter();
@@ -23,37 +22,42 @@ export const EventCard = ({
     };
 
     return (
-        <div
-            onClick={goToEvent}
-            className='p-6 bg-primary hover:bg-primary-muted hover:scale-105 rounded-md shadow-lg ring-1 ring-gray-900/5 transform transition duration-500 cursor-pointer m-5 max-w-96 w-full sm:w-[370px] h-[360px] sm:h-auto text-gray-800 flex flex-col'>
-            <div className='justify-center text-left'>
-                <h3 className='mb-2 w-fit px-3 bg-secondary font-semibold text-primary'>
+        <div className='relative w-94 mx-auto mt-20'>
+            <div className='w-full'>
+            <Image
+                src={image || '/assets/placeholder.jpg'}
+                width={200}
+                height={200}
+                alt='Event image'
+                className='h-64 w-full object-cover rounded-md'
+                />
+            </div>
+            <div className='absolute inset-0 bg-background opacity-60 rounded-md'></div>
+            <div className='absolute inset-0 flex items-center justify-center'>
+                <h3 className='text-white text-2xl font-semibold'>
                     {name}
                 </h3>
-                <div className='w-full h-[150px]'>
-                    <Image
-                        src={image || '/assets/placeholder.jpg'}
-                        width={200}
-                        height={200}
-                        alt='Event image'
-                        className='w-full h-[150px] object-cover rounded-md'
-                    />
+            </div>
+        <div
+            onClick={goToEvent}
+            className='p-6 hover:bg-tertiary bg-secondary-muted hover:scale-105 text-primary hover:text-secondary rounded-md shadow-lg ring-1 ring-gray-900/5 transform transition duration-500 cursor-pointer m-5 max-w-96 w-full sm:w-[370px] h-[360px] sm:h-auto text-gray-800 flex flex-col'>
+            <div>
                 </div>
-                <div className='flex flex-col gap-2 mt-4 text-sm'>
-                    <span>
-                        <span className='font-semibold'>Location: </span>
-                        {location}
-                    </span>
-                    <span>
-                        <span className='font-semibold'>Date: </span>
-                        {date}
-                    </span>
-                    <span>
-                        <span className='font-semibold'>Booked: </span>
-                        {numberOfBookedUsers}/{numberOfSpots}
-                    </span>
+                    <div className='flex flex-col gap-2  text-sm'>
+                        <span>
+                            <span className='font-semibold'>Location: </span>
+                            {location}
+                        </span>
+                        <span>
+                            <span className='font-semibold'>Date: </span>
+                            {date}
+                        </span>
+                        <span>
+                            <span className='font-semibold'>Booked: </span>
+                            {numberOfBookedUsers}/{numberOfSpots}
+                        </span>
+                    </div>
                 </div>
             </div>
-        </div>
     );
 };

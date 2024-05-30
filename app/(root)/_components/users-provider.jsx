@@ -4,7 +4,6 @@ import { createContext, useContext, useState } from 'react';
 import { useEvents } from './events-provider';
 import { useAuth } from '../../(auth)/_components/auth-provider';
 import { useParams } from 'next/navigation';
-import { bookEvent, undoBookedEvent } from '@/app/lib/event.db';
 import toast from 'react-hot-toast';
 
 export const UsersContext = createContext();
@@ -57,45 +56,43 @@ const UsersContextProvider = ({ children }) => {
         event.bookedUsers &&
         event.bookedUsers.some((u) => u.id === user?.uid);
 
-    const bookEventFunction = () => {
-        if (isMaxUsers || hasBooked) return;
-
-        if (!user || !user.uid) {
-            toast.error('You need to be logged in to book an event.');
-            return;
-        }
-
-        bookEvent(user?.uid, user?.email, id)
-            .then(() => {
-                setEvent((prevState) => ({
-                    ...prevState,
-                    bookedUsers: [
-                        ...currentlyBookedUsers,
-                        { id: user?.uid, email: user?.email },
-                    ],
-                }));
-                toast.success('Event booked successfully!');
+    const bookEventFunction = async () => {
+        await fetch('http://localhost:3000/api/events/booked', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                eventId: id,
+                id: user?.uid,
+                email: user?.email,
             })
-            .catch(() => {
+        }).then((res) => {
+            if (res.ok) {
+                res.json().then((data) => {
+                    if (data.message) {
+                        const bookings = event.bookedUsers
+                        const filteredBookings = bookings.filter((x) => x.id !== user?.uid)
+                        setEvent((prevState) => ({
+                            ...prevState,
+                            bookedUsers: filteredBookings
+                        })); 
+                        toast.success('Booking removed!');
+                    } else {
+                        setEvent((prevState) => ({
+                            ...prevState,
+                            bookedUsers: [
+                                ...currentlyBookedUsers,
+                                { id: user?.uid, email: user?.email },
+                            ],
+                        }));
+                        toast.success('Event booked successfully!');
+                    }
+                });
+            } else {
                 toast.error('Failed to book event, please try again.');
-            });
-    };
-
-    const undoBookedEventFunction = () => {
-        if (!currentlyBookedUsers) return;
-        undoBookedEvent(user?.uid, id)
-            .then(() => {
-                setEvent((prevState) => ({
-                    ...prevState,
-                    bookedUsers: currentlyBookedUsers.filter(
-                        (x) => x.id !== user?.uid
-                    ),
-                }));
-                toast.success('Event booking undone successfully!');
-            })
-            .catch(() => {
-                toast.error('Failed to undo booking, please try again.');
-            });
+            }
+        });
     };
 
     const value = {
@@ -109,8 +106,7 @@ const UsersContextProvider = ({ children }) => {
         bookEventFunction,
         isMaxUsers,
         numberOfBookedUsers,
-        hasBooked,
-        undoBookedEventFunction,
+        hasBooked
     };
 
     return (

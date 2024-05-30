@@ -1,16 +1,3 @@
-/*=============================================
-=                FÖR ATT ANVÄNDA            =
-
-Använda en färgvariabel med tailwind: text-error
-
-Skapa vanlig knapp: <button>
-Skapa sekundär knapp: <button className="secondary">
-
-Skapa error-knapp: <button className="error">
-Skapa disabled-knapp: <button disabled="...">
-
-=============================================*/
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,16 +7,15 @@ Skapa disabled-knapp: <button disabled="...">
         --background: #001f3f;
 
         --primary: #e8e8e8;
-        --primary-muted: #cfcfcf;
+        --primary-muted: #f6f2f8;
 
         --secondary: #32456f;
         --secondary-muted: #32456fbe;
 
         --tertiary: #cbb2da;
+        --tertiary-muted: #cbb2da7f;
 
         --error: #ce0606;
-
-        --admin: #32456f;
 
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     }
@@ -46,8 +32,6 @@ body {
 main {
     flex-grow: 1;
 }
-
-/*=====  Styling text  ======*/
 
 a {
     text-decoration: none;
@@ -81,46 +65,50 @@ h3 {
     font-weight: 300;
 }
 
-/*=====  Styling buttons  ======*/
-
 button {
-    display: flex; 
-    justify-content: center;
-    padding-top: 0.375rem;
-    padding-bottom: 0.375rem; 
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    width: 100%;
-    font-size: 0.85rem;
-    border-radius: 0.375rem;
-    line-height: 1.25rem;
-    letter-spacing: 0.2px;
-    font-weight: 600;
-    background: var(--secondary);
-    box-shadow: 0 1px 2px 0 rgba(7, 7, 7, 0.25);
-    border: 1px solid #a9a9a939;
+    align-items: center;
+    background-color: var(--tertiary-muted);
+    border: 2px solid var(--background);
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: var(--background);
     cursor: pointer;
-    transition: all 0.1s ease-in;
+    display: flex;
+    font-size: 16px;
+    height: 48px;
+    justify-content: center;
+    line-height: 24px;
+    max-width: 80%;
+    padding: 0 25px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+  
+button:after {
+    background-color: var(--tertiary);
+    border-radius: 8px;
+    content: "";
+    display: block;
+    height: 48px;
+    left: 0;
+    width: 100%;
+    position: absolute;
+    top: -2px;
+    transform: translate(8px, 8px);
+    transition: transform .2s ease-out;
+    z-index: -1;
+}
+  
+button:hover:after {
+    transform: translate(0, 0);
 }
 
 button:hover {
-    transform: translateY(2px);
-}
-
-button.secondary {
-    background: transparent;
-    border: 1px solid #d1d5db;
-}
-
-button.readmore {
-    background: var(--tertiary);
-    font-weight: 550;
-    color: white;
-    border: 1px solid var(--primary);
-}
-
-button.readmore:hover {
-    transform: translateX(4px);
+    outline: 0;
 }
 
 button.error {
@@ -129,14 +117,6 @@ button.error {
 
 button.error:hover {
     background-color: var(--error);
-}
-
-button.admin {
-    background-color: var(--admin);
-}
-
-button.admin:hover {
-    background-color: var(--admin);
 }
 
 button:disabled {

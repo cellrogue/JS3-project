@@ -1,10 +1,9 @@
 'use client';
 
-import SignOutButton from '@/app/(auth)/_components/sign-out-button';
+import SignOutButton from '/app/(auth)/_components/sign-out-button';
 import Image from 'next/image';
 import { useAuth } from '../../(auth)/_components/auth-provider';
 import Link from 'next/link';
-import { IoCog } from 'react-icons/io5';
 
 const Navbar = () => {
     const { user } = useAuth();
@@ -30,13 +29,13 @@ const Navbar = () => {
                     <SignOutButton />
                 ) : (
                     <Link href='/sign-in'>
-                        <button>Sign in</button>
+                        <button className='rounded p-5 text-sm font-bold m-5'>Sign in</button>
                     </Link>
                 )}
 
                 {!user && (
                     <Link href='/sign-up'>
-                        <button>Sign Up</button>
+                        <button className='rounded p-5 text-sm font-bold m-5'>Sign Up</button>
                     </Link>
                 )}
                 {user && (

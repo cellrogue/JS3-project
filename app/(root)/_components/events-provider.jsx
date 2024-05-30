@@ -1,9 +1,8 @@
 'use client';
 
-import { getAllEvents } from '@/app/lib/event.db';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { storage } from '@/firebase.config';
+import { storage } from '/firebase.config';
 import toast from 'react-hot-toast';
 
 export const EventsContext = createContext();
@@ -11,8 +10,6 @@ export const EventsContext = createContext();
 const EventsContextProvider = ({ children }) => {
     const [events, setEvents] = useState([]);
     const [event, setEvent] = useState(null);
-
-    // Function for fetching events
 
     const fetchEvents = async () => {
         try {
@@ -27,11 +24,22 @@ const EventsContextProvider = ({ children }) => {
         }
     };
 
+    const fetchEventById = async (eventId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/events/${eventId}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch event');
+            }
+            return await response.json();
+        } catch (error) {
+            toast.error('Failed to fetch event, please try again.');
+            console.error('Could not fetch event:', error.message);
+        }
+    };
+
     useEffect(() => {
         fetchEvents();
     }, []);
-
-    // If event is null, initialFormData will be an object with all properties set to their default values. If event is not null, initialFormData will be an object with properties set to the values of event properties, or their default values if the event properties are undefined.
 
     const initialFormData = event
         ? {
@@ -139,7 +147,8 @@ const EventsContextProvider = ({ children }) => {
         formData,
         setFormData,
         initialFormData,
-        fetchEvents
+        fetchEvents,
+        fetchEventById
     };
 
     return (

@@ -1,7 +1,7 @@
 'use client';
 
-import { useAuth } from '@/app/(auth)/_components/auth-provider';
-import { addNewUser } from '@/app/lib/user.db';
+import { useAuth } from '/app/(auth)/_components/auth-provider';
+import { addNewUser } from '/app/lib/user.db';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -70,12 +70,11 @@ const SignUpForm = () => {
             <form
                 className='space-y-6'
                 onSubmit={form.handleSubmit(onSubmit)}>
-                {/* Email input */}
                 <div>
                     <label
                         htmlFor='email'
                         className='block text-sm font-medium leading-6 text-gray-900'>
-                        Email address
+                        Email
                     </label>
                     <div className='mt-2'>
                         <input
@@ -95,8 +94,6 @@ const SignUpForm = () => {
                         )}
                     </div>
                 </div>
-
-                {/* First name input */}
                 <div>
                     <div className='flex items-center justify-between'>
                         <label
@@ -123,8 +120,6 @@ const SignUpForm = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Last name input */}
                 <div>
                     <div className='flex items-center justify-between'>
                         <label
@@ -151,8 +146,6 @@ const SignUpForm = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Password input */}
                 <div>
                     <div className='flex items-center justify-between'>
                         <label
@@ -179,8 +172,6 @@ const SignUpForm = () => {
                         )}
                     </div>
                 </div>
-
-                {/* Confirm password input */}
                 <div>
                     <div className='flex items-center justify-between'>
                         <label
@@ -214,7 +205,7 @@ const SignUpForm = () => {
                 <div>
                     <button
                         type='submit'
-                        className='flex w-full justify-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
+                        className='flex w-full justify-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-secondary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
                         Sign up
                     </button>
                 </div>
