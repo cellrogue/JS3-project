@@ -1,107 +1,82 @@
-'use client';
+'use client'
 
-import { auth } from '/firebase.config';
-import {
-    createUserWithEmailAndPassword,
-    onAuthStateChanged,
-    signInWithEmailAndPassword,
-    updateProfile,
-} from 'firebase/auth';
-
-import { createContext, useContext, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { auth } from "/firebase.config";
+import { createContext, useContext, useEffect, useState } from "react";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "firebase/auth";
+import toast from "react-hot-toast";
 
 export const AuthContext = createContext();
 
 const AuthContextProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
-  
-const [user, setUser] = useState(null)
-const [authLoaded, setAuthLoaded] = useState(false)
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, _user => {
+      setUser(_user);
+      setAuthLoaded(true);
+    });
 
-useEffect(() => {
-  const unsub = onAuthStateChanged(auth, _user => {
-    setUser(_user)
-    setAuthLoaded(true)
-  })
+    return () => unsub();
+  }, []);
 
-  return () => unsub()
-}, [])
+  const register = async (values) => {
+    const toastId = toast.loading('Creating account...');
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
 
+      if (!userCredential.user) {
+        throw new Error('Failed to create account. Please try again.');
+      }
 
-const register = async (values) => {
-  const toastId = toast.loading('Creating account...')
+      await updateProfile(userCredential.user, {
+        displayName: `${values.firstName} ${values.lastName}`
+      });
 
-  try {
-    const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password)
-
-    if(!userCredential.user) {
-      throw new Error('Something went wrong!. Please try again.')
+      toast.success('Account created successfully', { id: toastId });
+      return userCredential.user.uid;
+    } catch (err) {
+      console.error(err.message);
+      const message = err.code.split('/')[1].replace(/-/g, ' ');
+      toast.error(message || err.message, { id: toastId });
     }
-    console.log(userCredential);
+  };
 
-    await updateProfile(userCredential.user, {
-      displayName: `${values.firstName} ${values.lastName}`
-    }) 
+  const login = async (values) => {
+    const toastId = toast.loading('Signing in...');
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
 
-    setUser(userCredential.user)
+      if (!userCredential.user) {
+        throw new Error('Failed to sign in. Please try again.');
+      }
 
-    toast.success('Account created successfully',  { id: toastId })
-    
-    return userCredential.user.uid;
-
-  } catch (error) {
-    console.log(error.message);
-    console.log(error.code);
-    const message = error.code.split('/')[1].replace(/-/g, ' ')
-    toast.error(message || error.message, { id: toastId })
-  } 
-
-}
-
-
-const login = async (values) => {
-  const toastId = toast.loading('Signing in...')
-
-  try {
-    const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password)
-
-    if(!userCredential.user) {
-      throw new Error('Something went wrong!. Please try again.')
+      toast.success('Logged in successfully', { id: toastId });
+    } catch (err) {
+      console.error(err.message);
+      const message = err.code.split('/')[1].replace(/-/g, ' ');
+      toast.error(message || err.message, { id: toastId });
     }
-    console.log(userCredential);
-    const token = await userCredential.user.getIdToken()
-    console.log('token:', token)
+  };
 
-    toast.success('Logged in successfully',  { id: toastId })
+  const value = {
+    user,
+    authLoaded,
+    register,
+    login
+  };
 
-  } catch (error) {
-    console.log(error.message);
-    const message = error.code.split('/')[1].replace(/-/g, ' ')
-    toast.error(message || error.message, { id: toastId })
-  } 
-}
-
-
-const value = {
-  user,
-  authLoaded,
-  register,
-  login
-}
-
-  return(
+  return (
     <AuthContext.Provider value={value}>
-      {children}
+      { children }
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
-export default AuthContextProvider
+export default AuthContextProvider;
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context)
-        throw new Error('useAuth must be used within an AuthContextProvider');
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used inside of an AuthContextProvider');
+  return context;
 };

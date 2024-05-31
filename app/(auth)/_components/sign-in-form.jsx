@@ -1,99 +1,84 @@
 'use client';
 
 import { useAuth } from '/app/(auth)/_components/auth-provider';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { MdErrorOutline } from 'react-icons/md';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { useRouter } from 'next/navigation';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { z } from 'zod';
+import React, { useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const formSchema = z.object({
-    email: z.string().email({ message: 'You need to enter a valid email' }),
-    password: z.string().min(1, { message: 'You need to enter a password' }),
+    email: z.string().email({ message: "You need to enter a valid email" }),
+    password: z.string().min(6, { message: 'You need to enter a valid password' }),
 });
+
+const validate = (values) => {
+    const errors = {};
+    if (!values.email) {
+        errors.email = 'Email is required';
+    } else {
+        try {
+            formSchema.parse(values);
+        } catch (error) {
+            return error.flatten().fieldErrors;
+        }
+    }
+    return errors;
+};
 
 const SignInForm = () => {
     const { login } = useAuth();
     const router = useRouter();
 
-    const form = useForm({
+    const initialValues = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: '',
             password: '',
-        },
-    });
+        }
+    })
 
-    function onSubmit(values) {
-        login(values);
-        router.push('/');
-    }
+    const onSubmit = async (values, { setSubmitting, setErrors }) => {
+        setSubmitting(true);
+        try {
+            await login(values);
+            router.push('/'); 
+            console.log('User signed in successfully');
+        } catch (error) {
+            console.error('Failed to sign in:', error);
+            setErrors({ submit: 'Invalid email or password. Please try again.' });
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
-        <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
-            <form
-                className='space-y-6'
-                onSubmit={form.handleSubmit(onSubmit)}>
-                <div>
-                    <label
-                        htmlFor='email'
-                        className='block text-sm font-medium leading-6 text-gray-900'>
-                        Email
-                    </label>
-                    <div className='mt-2'>
-                        <input
-                            id='email'
-                            name='email'
-                            type='email'
-                            {...form.register('email')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.email && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.email.message}
-                                </span>
-                            </span>
-                        )}
+        <Formik
+            initialValues={initialValues}
+            validate={validate}
+            onSubmit={onSubmit}
+        >
+            {({ isSubmitting, errors }) => (
+                <Form className='text-secondary mt-10 sm:mx-auto sm:w-full sm:max-w-sm space-y-6 justify-center'>
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="email">Email</label>
+                        <Field type="email" id="email" name="email" />
+                        <ErrorMessage name="email" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                </div>
-                <div>
-                    <div className='flex items-center justify-between'>
-                        <label
-                            htmlFor='password'
-                            className='block text-sm font-medium leading-6 text-gray-900'>
-                            Password
-                        </label>
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="password">Password</label>
+                        <Field type="password" id="password" name="password" />
+                        <ErrorMessage name="password" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                    <div className='mt-2'>
-                        <input
-                            id='password'
-                            name='password'
-                            type='password'
-                            {...form.register('password')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.password && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.password.message}
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                <div>
-                    <button
-                        type='submit'
-                        className='flex w-full justify-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-secondary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
-                        Sign in
+                    {errors.submit && <div>{errors.submit}</div>}
+                    <button type="submit" disabled={isSubmitting} className='flex w-1/4 justify-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-secondary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
+                        {isSubmitting ? 'Signing in...' : 'Sign In'}
                     </button>
-                </div>
-            </form>
-        </div>
+                </Form>
+            )}
+        </Formik>
     );
 };
+
 export default SignInForm;

@@ -43,7 +43,7 @@ export const EventCard = ({
             className='p-6 hover:bg-tertiary bg-secondary-muted hover:scale-105 text-primary hover:text-secondary rounded-md shadow-lg ring-1 ring-gray-900/5 transform transition duration-500 cursor-pointer m-5 max-w-96 w-full sm:w-[370px] h-[360px] sm:h-auto text-gray-800 flex flex-col'>
             <div>
                 </div>
-                    <div className='flex flex-col gap-2  text-sm'>
+                    <div className='flex flex-col gap-2 text-sm'>
                         <span>
                             <span className='font-semibold'>Location: </span>
                             {location}

@@ -2,41 +2,28 @@
 
 import { useAuth } from '/app/(auth)/_components/auth-provider';
 import { addNewUser } from '/app/lib/user.db';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { MdErrorOutline } from 'react-icons/md';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
 import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
-const formSchema = z
-    .object({
-        email: z.string().email({ message: 'You need to enter a valid email' }),
-        firstName: z
-            .string()
-            .min(1, { message: 'You need to enter a first name' }),
-        lastName: z
-            .string()
-            .min(1, { message: 'You need to enter a last name' }),
-        password: z.string().min(6, {
-            message: 'The password must be at least 6 characters long',
-        }),
-        confirmPassword: z.string(),
-    })
-    .refine(
-        (values) => {
-            return values.password === values.confirmPassword;
-        },
-        {
-            message: 'Passwords must match',
-            path: ['confirmPassword'],
-        }
-    );
+const formSchema = z.object({
+    email: z.string().email({ message: "You need to enter a valid email" }),
+    firstName: z.string().min(1, { message: 'You need to enter a first name' }),
+    lastName: z.string().min(1, { message: 'You need to enter a last name' }),
+    password: z.string().min(6, { message: 'The password must be at least 6 characters long' }),
+    confirmPassword: z.string(),
+}).refine(values => values.password === values.confirmPassword, {
+    message: 'Passwords must match',
+    path: ["confirmPassword"]
+});
 
 const SignUpForm = () => {
     const { register } = useAuth();
     const router = useRouter();
 
-    const form = useForm({
+    const initialValues = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: '',
@@ -44,173 +31,85 @@ const SignUpForm = () => {
             lastName: '',
             password: '',
             confirmPassword: '',
-        },
+        }
     });
 
-    const onSubmit = async (values) => {
+    const onSubmit = async (values, { setSubmitting }) => {
+        setSubmitting(true);
         try {
             const uid = await register(values);
-            await addNewUser(
-                {
-                    name: `${values.firstName} ${values.lastName}`,
-                    email: values.email,
-                    password: values.password,
-                },
+            await addNewUser({ 
+                name: `${values.firstName} ${values.lastName}`, 
+                email: values.email, 
+                password: values.password },
                 uid
             );
             router.push('/');
             console.log('User added successfully');
         } catch (error) {
-            console.error('Could not add user to database!', error);
+            console.error('Failed to add user:', error);
+        } finally {
+            setSubmitting(false);
         }
     };
 
     return (
-        <div className='mt-10 sm:mx-auto sm:w-full sm:max-w-sm'>
-            <form
-                className='space-y-6'
-                onSubmit={form.handleSubmit(onSubmit)}>
-                <div>
-                    <label
-                        htmlFor='email'
-                        className='block text-sm font-medium leading-6 text-gray-900'>
-                        Email
-                    </label>
-                    <div className='mt-2'>
-                        <input
-                            id='email'
-                            name='email'
-                            type='email'
-                            {...form.register('email')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.email && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.email?.message}
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div>
-                    <div className='flex items-center justify-between'>
-                        <label
-                            htmlFor='first-name'
-                            className='block text-sm font-medium leading-6 text-gray-900'>
-                            First name
+        <Formik
+            initialValues={initialValues}
+            validate={(values) => {
+                try {
+                    formSchema.parse(values);
+                    return {};
+                } catch (error) {
+                    return error.flatten().fieldErrors;
+                }
+            }}
+            onSubmit={onSubmit}
+        >
+            {({ isSubmitting }) => (
+                <Form className='text-secondary mt-10 sm:mx-auto sm:w-full sm:max-w-sm space-y-6 justify-center'>
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="firstName">
+                            First Name
                         </label>
+                        <Field type="text" id="firstName" name="firstName" className="mt-2" />
+                        <ErrorMessage name="firstName" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                    <div className='mt-2'>
-                        <input
-                            id='first-name'
-                            name='first-name'
-                            type='text'
-                            {...form.register('firstName')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.firstName && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.email.message}
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div>
-                    <div className='flex items-center justify-between'>
-                        <label
-                            htmlFor='last-name'
-                            className='block text-sm font-medium leading-6 text-gray-900'>
-                            Last name
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="lastName">
+                            Last Name
                         </label>
+                        <Field type="text" id="lastName" name="lastName" className="mt-2" />
+                        <ErrorMessage name="lastName" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                    <div className='mt-2'>
-                        <input
-                            id='last-name'
-                            name='last-name'
-                            type='text'
-                            {...form.register('lastName')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.lastName && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.lastName.message}
-                                </span>
-                            </span>
-                        )}
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="email">
+                            Email
+                        </label>
+                        <Field type="email" id="email" name="email" className="mt-2" />
+                        <ErrorMessage name="email" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                </div>
-                <div>
-                    <div className='flex items-center justify-between'>
-                        <label
-                            htmlFor='password'
-                            className='block text-sm font-medium leading-6 text-gray-900'>
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="password">
                             Password
                         </label>
+                        <Field type="password" id="password" name="password" className="mt-2" />
+                        <ErrorMessage name="password" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                    <div className='mt-2'>
-                        <input
-                            id='password'
-                            name='password'
-                            type='password'
-                            {...form.register('password')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.password && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {form.formState.errors.password.message}
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div>
-                    <div className='flex items-center justify-between'>
-                        <label
-                            htmlFor='confirm-password'
-                            className='block text-sm font-medium leading-6 text-gray-900'>
-                            Confirm password
+                    <div className='flex justify-center flex-col'>
+                        <label htmlFor="confirmPassword">
+                            Confirm Password
                         </label>
+                        <Field type="password" id="confirmPassword" name="confirmPassword" className="mt-2" />
+                        <ErrorMessage name="confirmPassword" component="div" className='text-error text-sm mt-[2px] flex gap-1 items-center' />
                     </div>
-                    <div className='mt-2'>
-                        <input
-                            id='confirm-password'
-                            name='confirm-password'
-                            type='password'
-                            {...form.register('confirmPassword')}
-                            className='block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-tertiary sm:text-sm sm:leading-6'
-                        />
-                        {form.formState.errors.confirmPassword && (
-                            <span className='text-error text-xs mt-[2px] flex gap-1 items-center'>
-                                <MdErrorOutline />
-                                <span className='text-xs'>
-                                    {
-                                        form.formState.errors.confirmPassword
-                                            .message
-                                    }
-                                </span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                <div>
-                    <button
-                        type='submit'
-                        className='flex w-full justify-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-secondary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
-                        Sign up
+                    <button type="submit" disabled={isSubmitting} className='flex w-1/2 justify-center items-center rounded-md bg-tertiary px-3 py-1.5 text-sm font-semibold leading-6 text-secondary shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-tertiary'>
+                        {isSubmitting ? 'Submitting...' : 'Submit'}
                     </button>
-                </div>
-            </form>
-        </div>
+                </Form>
+            )}
+        </Formik>
     );
 };
+
 export default SignUpForm;
